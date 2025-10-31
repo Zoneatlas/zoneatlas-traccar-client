@@ -32,5 +32,8 @@
   "passwordError": "Wrong password",
   "startAction": "Start service",
   "stopAction": "Stop service",
-  "sosAction": "Send SOS"
+  "sosAction": "Send SOS",
+  "selectTask": "Select task",
+  "currentTask": "Current task",
+  "noTask": "No task selected"
 }

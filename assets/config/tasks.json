@@ -1,0 +1,19 @@
+{
+  "tasks": [
+    {
+      "id": "task1",
+      "name": "Task 1",
+      "description": "Description for task 1"
+    },
+    {
+      "id": "task2",
+      "name": "Task 2",
+      "description": "Description for task 2"
+    },
+    {
+      "id": "task3",
+      "name": "Task 3",
+      "description": "Description for task 3"
+    }
+  ]
+}

@@ -6,11 +6,13 @@ class Location {
   final double latitude;
   final double longitude;
   final double heading;
+  final String? task;
   const Location({
     required this.timestamp,
     required this.latitude,
     required this.longitude,
     required this.heading,
+    this.task,
   });
 }
 
@@ -23,12 +25,14 @@ class LocationCache {
       final latitude = Preferences.instance.getDouble(Preferences.lastLatitude);
       final longitude = Preferences.instance.getDouble(Preferences.lastLongitude);
       final heading = Preferences.instance.getDouble(Preferences.lastHeading);
+      final task = Preferences.instance.getString(Preferences.lastTask);
       if (timestamp != null && latitude != null && longitude != null && heading != null) {
         _last = Location(
           timestamp: timestamp,
           latitude: latitude,
           longitude: longitude,
           heading: heading,
+          task: task,
         );
       }
     }
@@ -41,11 +45,13 @@ class LocationCache {
       latitude: location.coords.latitude,
       longitude: location.coords.longitude,
       heading: location.coords.heading,
+      task: location.extras?['task'] as String?,
     );
     Preferences.instance.setString(Preferences.lastTimestamp, last.timestamp);
     Preferences.instance.setDouble(Preferences.lastLatitude, last.latitude);
     Preferences.instance.setDouble(Preferences.lastLongitude, last.longitude);
     Preferences.instance.setDouble(Preferences.lastHeading, last.heading);
+    Preferences.instance.setString(Preferences.lastTask, last.task ?? '');
     _last = last;
   }
 }

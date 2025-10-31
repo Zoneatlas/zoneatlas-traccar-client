@@ -26,6 +26,10 @@ class Preferences {
   static const String lastLongitude = 'lastLongitude';
   static const String lastHeading = 'lastHeading';
 
+  // Current task preference key
+  static const String currentTask = 'currentTask';
+  static const String lastTask = 'lastTask';
+
   static Future<void> init() async {
     instance = await SharedPreferencesWithCache.create(
       sharedPreferencesOptions: Platform.isAndroid
@@ -38,6 +42,7 @@ class Preferences {
           lastTimestamp, lastLatitude, lastLongitude, lastHeading,
           'device_id_preference', 'server_url_preference', 'accuracy_preference',
           'frequency_preference', 'distance_preference', 'buffer_preference',
+          currentTask,
         },
       ),
     );
@@ -70,6 +75,7 @@ class Preferences {
     await instance.setBool(buffer, instance.getBool(buffer) ?? true);
     await instance.setBool(stopDetection, instance.getBool(stopDetection) ?? true);
     await instance.setInt(fastestInterval, instance.getInt(fastestInterval) ?? 30);
+    await instance.setString(currentTask, instance.getString(currentTask) ?? '');
   }
 
   static bg.Config geolocationConfig() {
