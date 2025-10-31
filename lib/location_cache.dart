@@ -40,12 +40,16 @@ class LocationCache {
   }
 
   static Future<void> set(bg.Location location) async {
+    // Get task from extras if available (e.g., from SOS/heartbeat), otherwise use current task from preferences
+    final taskFromExtras = location.extras?['task'] as String?;
+    final currentTask = taskFromExtras ?? Preferences.instance.getString(Preferences.currentTask);
+    
     final last = Location(
       timestamp: location.timestamp,
       latitude: location.coords.latitude,
       longitude: location.coords.longitude,
       heading: location.coords.heading,
-      task: location.extras?['task'] as String?,
+      task: currentTask,
     );
     Preferences.instance.setString(Preferences.lastTimestamp, last.timestamp);
     Preferences.instance.setDouble(Preferences.lastLatitude, last.latitude);

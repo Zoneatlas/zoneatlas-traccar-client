@@ -98,6 +98,10 @@ class Preferences {
       url: _formatUrl(instance.getString(url)),
       params: {
         'device_id': instance.getString(id),
+        'task': instance.getString(currentTask),
+      },
+      extras: {
+        'task': instance.getString(currentTask) ?? '',
       },
       distanceFilter: isHighestAccuracy ? 0 : instance.getInt(distance)?.toDouble(),
       locationUpdateInterval: isHighestAccuracy ? 0 : (locationUpdateInterval > 0 ? locationUpdateInterval : null),
@@ -153,8 +157,8 @@ class Preferences {
       "activity": {
         "type": "<%= activity.type %>"
       },
-      "extras": {},
-      "_": "&id=${instance.getString(id)}&lat=<%= latitude %>&lon=<%= longitude %>&timestamp=<%= timestamp %>&"
+      "extras": <%= extras %>,
+      "_": "&id=${instance.getString(id)}&lat=<%= latitude %>&lon=<%= longitude %>&timestamp=<%= timestamp %>&task=<%= extras.task %>&"
     }'''.split('\n').map((line) => line.trimLeft()).join();
   }
 

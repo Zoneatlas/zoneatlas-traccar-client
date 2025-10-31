@@ -270,8 +270,10 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
               const Spacer(),
               TaskDropdown(
                 isDisabled: trackingEnabled,
-                onTaskSelected: (taskId) {
-                  Preferences.instance.setString(Preferences.currentTask, taskId ?? '');
+                onTaskSelected: (taskId) async {
+                  await Preferences.instance.setString(Preferences.currentTask, taskId ?? '');
+                  // Update the BackgroundGeolocation config to include the new task
+                  await bg.BackgroundGeolocation.setConfig(Preferences.geolocationConfig());
                 },
                 initialValue: Preferences.instance.getString(Preferences.currentTask) ?? '',
               ),

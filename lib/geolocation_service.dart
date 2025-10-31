@@ -46,7 +46,14 @@ class GeolocationService {
   }
 
   static Future<void> onHeartbeat(bg.HeartbeatEvent event) async {
-    await bg.BackgroundGeolocation.getCurrentPosition(samples: 1, persist: true, extras: {'heartbeat': true});
+    await bg.BackgroundGeolocation.getCurrentPosition(
+      samples: 1, 
+      persist: true, 
+      extras: {
+        'heartbeat': true,
+        'task': Preferences.instance.getString(Preferences.currentTask) ?? '',
+      },
+    );
   }
 
   static Future<void> onLocation(bg.Location location) async {

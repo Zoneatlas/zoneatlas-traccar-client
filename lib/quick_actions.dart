@@ -6,6 +6,7 @@ import 'package:quick_actions/quick_actions.dart';
 import 'package:flutter_background_geolocation/flutter_background_geolocation.dart' as bg;
 
 import 'l10n/app_localizations.dart';
+import 'preferences.dart';
 
 class QuickActionsInitializer extends StatefulWidget {
   const QuickActionsInitializer({super.key});
@@ -28,7 +29,14 @@ class _QuickActionsInitializerState extends State<QuickActionsInitializer> {
           bg.BackgroundGeolocation.stop();
         case 'sos':
           try {
-            await bg.BackgroundGeolocation.getCurrentPosition(samples: 1, persist: true, extras: {'alarm': 'sos'});
+            await bg.BackgroundGeolocation.getCurrentPosition(
+              samples: 1, 
+              persist: true, 
+              extras: {
+                'alarm': 'sos',
+                'task': Preferences.instance.getString(Preferences.currentTask) ?? '',
+              },
+            );
           } catch (error) {
             developer.log('Failed to send alert', error: error);
           }
