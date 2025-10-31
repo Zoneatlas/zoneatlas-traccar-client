@@ -37,5 +37,8 @@
   "stopTracking": "Lopeta seuranta",
   "selectTask": "Valitse tehtävä",
   "currentTask": "Nykyinen tehtävä",
-  "noTask": "Ei tehtävää valittuna"
+  "noTask": "Ei tehtävää valittuna",
+  "statusActive": "Aktiivinen",
+  "statusIdle": "Lepotilassa",
+  "statusInactive": "Ei aktiivinen"
 }

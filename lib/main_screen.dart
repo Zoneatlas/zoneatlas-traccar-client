@@ -24,6 +24,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   bool? isMoving;
   late AnimationController _pulseController;
   late AnimationController _scaleController;
+  late AnimationController _borderController;
   late Animation<double> _pulseAnimation;
   late Animation<double> _scaleAnimation;
 
@@ -49,6 +50,13 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       CurvedAnimation(parent: _scaleController, curve: Curves.easeOutBack),
     );
 
+    // Circular border animation
+    _borderController = AnimationController(
+      duration: const Duration(milliseconds: 8000),
+      animationBehavior: AnimationBehavior.preserve,
+      vsync: this,
+    );
+
     _initState();
   }
 
@@ -56,6 +64,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   void dispose() {
     _pulseController.dispose();
     _scaleController.dispose();
+    _borderController.dispose();
     super.dispose();
   }
 
@@ -70,6 +79,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     if (trackingEnabled) {
       _pulseController.repeat(reverse: true);
       _scaleController.forward();
+      _borderController.repeat();
     }
 
     bg.BackgroundGeolocation.onEnabledChange((bool enabled) {
@@ -81,9 +91,11 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       if (enabled) {
         _pulseController.repeat(reverse: true);
         _scaleController.forward();
+        _borderController.repeat();
       } else {
         _pulseController.stop();
         _scaleController.reverse();
+        _borderController.stop();
       }
     });
     bg.BackgroundGeolocation.onMotionChange((bg.Location location) {
@@ -128,218 +140,243 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   Widget _buildTrackingCard() {
     return ScaleTransition(
       scale: _scaleAnimation,
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          AppLocalizations.of(context)!.trackingTitle,
-                          style: Theme.of(context).textTheme.headlineMedium,
-                        ),
-                        const SizedBox(height: 4),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
+      child: AnimatedBuilder(
+        animation: _borderController,
+        builder: (context, child) {
+          return CustomPaint(
+            painter: trackingEnabled
+                ? CircularBorderPainter(
+                    progress: _borderController.value,
+                    color: const Color(0xFF0d9488),
+                  )
+                : null,
+            child: child,
+          );
+        },
+        child: Card(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            AppLocalizations.of(context)!.trackingTitle,
+                            style: Theme.of(context).textTheme.headlineMedium,
                           ),
-                          decoration: BoxDecoration(
-                            color:
-                                trackingEnabled
-                                    ? (isMoving == true
-                                        ? const Color(0xFF0d9488).withAlpha(70)
-                                        : Colors.orange.withAlpha(70))
-                                    : Colors.grey.withAlpha(50),
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow:
-                                trackingEnabled
-                                    ? [
-                                      BoxShadow(
-                                        color: (isMoving == true
+                          const SizedBox(height: 4),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color:
+                                  trackingEnabled
+                                      ? (isMoving == true
+                                          ? const Color(
+                                            0xFF0d9488,
+                                          ).withAlpha(70)
+                                          : Colors.orange.withAlpha(70))
+                                      : Colors.grey.withAlpha(50),
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow:
+                                  trackingEnabled
+                                      ? [
+                                        BoxShadow(
+                                          color: (isMoving == true
+                                                  ? const Color(0xFF0d9488)
+                                                  : Colors.orange)
+                                              .withAlpha(20),
+                                          blurRadius: 8,
+                                          spreadRadius: 1,
+                                        ),
+                                      ]
+                                      : null,
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                AnimatedBuilder(
+                                  animation: _pulseAnimation,
+                                  builder: (context, child) {
+                                    return Transform.scale(
+                                      scale:
+                                          trackingEnabled
+                                              ? _pulseAnimation.value
+                                              : 1.0,
+                                      child: Container(
+                                        width: 8,
+                                        height: 8,
+                                        decoration: BoxDecoration(
+                                          color:
+                                              trackingEnabled
+                                                  ? (isMoving == true
+                                                      ? const Color(0xFF0d9488)
+                                                      : Colors.orange)
+                                                  : Colors.grey,
+                                          shape: BoxShape.circle,
+                                          boxShadow:
+                                              trackingEnabled
+                                                  ? [
+                                                    BoxShadow(
+                                                      color: (isMoving == true
+                                                              ? const Color(
+                                                                0xFF0d9488,
+                                                              )
+                                                              : Colors.orange)
+                                                          .withAlpha(50),
+                                                      blurRadius: 4,
+                                                      spreadRadius: 1,
+                                                    ),
+                                                  ]
+                                                  : null,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  trackingEnabled
+                                      ? (isMoving == true ? AppLocalizations.of(context)!.statusActive : AppLocalizations.of(context)!.statusIdle)
+                                      : AppLocalizations.of(context)!.statusInactive,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color:
+                                        trackingEnabled
+                                            ? (isMoving == true
                                                 ? const Color(0xFF0d9488)
                                                 : Colors.orange)
-                                            .withAlpha(20),
-                                        blurRadius: 8,
-                                        spreadRadius: 1,
-                                      ),
-                                    ]
-                                    : null,
+                                            : Colors.grey,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              AnimatedBuilder(
-                                animation: _pulseAnimation,
-                                builder: (context, child) {
-                                  return Transform.scale(
-                                    scale:
-                                        trackingEnabled
-                                            ? _pulseAnimation.value
-                                            : 1.0,
-                                    child: Container(
-                                      width: 8,
-                                      height: 8,
-                                      decoration: BoxDecoration(
-                                        color:
-                                            trackingEnabled
-                                                ? (isMoving == true
-                                                    ? const Color(0xFF0d9488)
-                                                    : Colors.orange)
-                                                : Colors.grey,
-                                        shape: BoxShape.circle,
-                                        boxShadow:
-                                            trackingEnabled
-                                                ? [
-                                                  BoxShadow(
-                                                    color: (isMoving == true
-                                                            ? const Color(
-                                                              0xFF0d9488,
-                                                            )
-                                                            : Colors.orange)
-                                                        .withAlpha(50),
-                                                    blurRadius: 4,
-                                                    spreadRadius: 1,
-                                                  ),
-                                                ]
-                                                : null,
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                trackingEnabled
-                                    ? (isMoving == true ? 'Active' : 'Idle')
-                                    : 'Inactive',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color:
-                                      trackingEnabled
-                                          ? (isMoving == true
-                                              ? const Color(0xFF0d9488)
-                                              : Colors.orange)
-                                          : Colors.grey,
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.settings_outlined),
+                      iconSize: 28,
+                      onPressed: () async {
+                        if (await PasswordService.authenticate(context) &&
+                            mounted) {
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const SettingsScreen(),
+                            ),
+                          );
+                          setState(() {});
+                        }
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                InfoCard(
+                  label: AppLocalizations.of(context)!.idLabel,
+                  value: Preferences.instance.getString(Preferences.id) ?? '',
+                  icon: Icons.fingerprint,
+                ),
+                const SizedBox(height: 8),
+                InfoCard(
+                  label: AppLocalizations.of(context)!.urlLabel,
+                  value: Preferences.instance.getString(Preferences.url) ?? '',
+                  icon: Icons.route,
+                  primaryColor: Colors.teal,
+                ),
+                const Spacer(),
+                TaskDropdown(
+                  isDisabled: trackingEnabled,
+                  onTaskSelected: (taskId) async {
+                    await Preferences.instance.setString(
+                      Preferences.currentTask,
+                      taskId ?? '',
+                    );
+                    // Update the BackgroundGeolocation config to include the new task
+                    await bg.BackgroundGeolocation.setConfig(
+                      Preferences.geolocationConfig(),
+                    );
+                  },
+                  initialValue:
+                      Preferences.instance.getString(Preferences.currentTask) ??
+                      '',
+                ),
+
+                const SizedBox(height: 32),
+                SizedBox(
+                  width: double.infinity,
+                  height: 64,
+                  child: FilledButton(
+                    onPressed: () async {
+                      if (await PasswordService.authenticate(context) &&
+                          mounted) {
+                        if (!trackingEnabled) {
+                          try {
+                            await bg.BackgroundGeolocation.start();
+                            if (mounted) {
+                              _checkBatteryOptimizations(context);
+                            }
+                          } on PlatformException catch (error) {
+                            messengerKey.currentState?.showSnackBar(
+                              SnackBar(
+                                content: Text(error.message ?? error.code),
+                                behavior: SnackBarBehavior.floating,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
                               ),
-                            ],
+                            );
+                          }
+                        } else {
+                          bg.BackgroundGeolocation.stop();
+                        }
+                      }
+                    },
+                    style: FilledButton.styleFrom(
+                      backgroundColor:
+                          trackingEnabled
+                              ? Theme.of(context).colorScheme.error
+                              : const Color(0xFF0d9488),
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shadowColor: Colors.transparent,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          trackingEnabled
+                              ? Icons.stop_circle_outlined
+                              : Icons.play_circle_outline,
+                          size: 28,
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          trackingEnabled
+                              ? AppLocalizations.of(context)!.stopTracking
+                              : AppLocalizations.of(context)!.startTracking,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.5,
                           ),
                         ),
                       ],
                     ),
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.settings_outlined),
-                    iconSize: 28,
-                    onPressed: () async {
-                      if (await PasswordService.authenticate(context) &&
-                          mounted) {
-                        await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const SettingsScreen(),
-                          ),
-                        );
-                        setState(() {});
-                      }
-                    },
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              InfoCard(
-                label: AppLocalizations.of(context)!.idLabel,
-                value: Preferences.instance.getString(Preferences.id) ?? '',
-                icon: Icons.fingerprint,
-              ),
-              const SizedBox(height: 8),
-              InfoCard(
-                label: AppLocalizations.of(context)!.urlLabel,
-                value: Preferences.instance.getString(Preferences.url) ?? '',
-                icon: Icons.route,
-                primaryColor: Colors.teal,
-              ),
-              const Spacer(),
-              TaskDropdown(
-                isDisabled: trackingEnabled,
-                onTaskSelected: (taskId) async {
-                  await Preferences.instance.setString(Preferences.currentTask, taskId ?? '');
-                  // Update the BackgroundGeolocation config to include the new task
-                  await bg.BackgroundGeolocation.setConfig(Preferences.geolocationConfig());
-                },
-                initialValue: Preferences.instance.getString(Preferences.currentTask) ?? '',
-              ),
-
-              const SizedBox(height: 32),
-              SizedBox(
-                width: double.infinity,
-                height: 64,
-                child: FilledButton(
-                  onPressed: () async {
-                    if (await PasswordService.authenticate(context) &&
-                        mounted) {
-                      if (!trackingEnabled) {
-                        try {
-                          await bg.BackgroundGeolocation.start();
-                          if (mounted) {
-                            _checkBatteryOptimizations(context);
-                          }
-                        } on PlatformException catch (error) {
-                          messengerKey.currentState?.showSnackBar(
-                            SnackBar(
-                              content: Text(error.message ?? error.code),
-                              behavior: SnackBarBehavior.floating,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                          );
-                        }
-                      } else {
-                        bg.BackgroundGeolocation.stop();
-                      }
-                    }
-                  },
-                  style: FilledButton.styleFrom(
-                    backgroundColor:
-                        trackingEnabled
-                            ? Theme.of(context).colorScheme.error
-                            : const Color(0xFF0d9488),
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    shadowColor: Colors.transparent,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        trackingEnabled
-                            ? Icons.stop_circle_outlined
-                            : Icons.play_circle_outline,
-                        size: 28,
-                      ),
-                      const SizedBox(width: 12),
-                      Text(
-                        trackingEnabled ? AppLocalizations.of(context)!.stopTracking : AppLocalizations.of(context)!.startTracking,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ],
-                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -400,5 +437,51 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         ),
       ),
     );
+  }
+}
+
+class CircularBorderPainter extends CustomPainter {
+  final double progress;
+  final Color color;
+
+  CircularBorderPainter({required this.progress, required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rect = Rect.fromLTWH(3, 3, size.width - 3, size.height - 3);
+    final rrect = RRect.fromRectAndRadius(rect, const Radius.circular(16));
+
+    // Create a path that follows the rounded rectangle
+    final path = Path()..addRRect(rrect);
+    final pathMetrics = path.computeMetrics().first;
+    final totalLength = pathMetrics.length;
+
+    // Add a glow effect
+    final glowPaint = Paint()
+      ..color = color.withAlpha(50)
+      ..strokeWidth = 6.0
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6);
+
+    // Calculate which phase we're in (0-0.5 = drawing, 0.5-1.0 = erasing)
+    if (progress <= 0.5) {
+      // First half: draw from 0 to full
+      final drawProgress = progress * 2; // Map 0-0.5 to 0-1
+      final currentLength = totalLength * drawProgress;
+      final extractPath = pathMetrics.extractPath(0, currentLength);
+      canvas.drawPath(extractPath, glowPaint);
+    } else {
+      // Second half: keep full, but erase from start
+      final eraseProgress = (progress - 0.5) * 2; // Map 0.5-1.0 to 0-1
+      final startLength = totalLength * eraseProgress;
+      final extractPath = pathMetrics.extractPath(startLength, totalLength);
+      canvas.drawPath(extractPath, glowPaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(CircularBorderPainter oldDelegate) {
+    return oldDelegate.progress != progress || oldDelegate.color != color;
   }
 }
