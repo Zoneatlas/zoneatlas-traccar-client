@@ -33,6 +33,8 @@
   "startAction": "Start service",
   "stopAction": "Stop service",
   "sosAction": "Send SOS",
+  "startTracking": "Start Tracking",
+  "stopTracking": "Stop Tracking",
   "selectTask": "Select task",
   "currentTask": "Current task",
   "noTask": "No task selected"

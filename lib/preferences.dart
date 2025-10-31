@@ -43,6 +43,7 @@ class Preferences {
           'device_id_preference', 'server_url_preference', 'accuracy_preference',
           'frequency_preference', 'distance_preference', 'buffer_preference',
           currentTask,
+          lastTask,
         },
       ),
     );
@@ -157,8 +158,7 @@ class Preferences {
       "activity": {
         "type": "<%= activity.type %>"
       },
-      "extras": <%= extras %>,
-      "_": "&id=${instance.getString(id)}&lat=<%= latitude %>&lon=<%= longitude %>&timestamp=<%= timestamp %>&task=<%= extras.task %>&"
+      "_": "&id=${instance.getString(id)}&lat=<%= latitude %>&lon=<%= longitude %>&timestamp=<%= timestamp %>&task=${instance.getString(currentTask) ?? ''}&"
     }'''.split('\n').map((line) => line.trimLeft()).join();
   }
 

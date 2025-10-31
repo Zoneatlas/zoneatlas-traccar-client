@@ -328,7 +328,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                       ),
                       const SizedBox(width: 12),
                       Text(
-                        trackingEnabled ? 'Stop Tracking' : 'Start Tracking',
+                        trackingEnabled ? AppLocalizations.of(context)!.stopTracking : AppLocalizations.of(context)!.startTracking,
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w600,

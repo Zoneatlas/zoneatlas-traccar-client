@@ -32,5 +32,10 @@
   "passwordError": "Wrong password",
   "startAction": "Käynnistä seuranta",
   "stopAction": "Lopeta seuranta",
-  "sosAction": "Lähetä SOS"
+  "sosAction": "Lähetä SOS",
+  "startTracking": "Aloita seuranta",
+  "stopTracking": "Lopeta seuranta",
+  "selectTask": "Valitse tehtävä",
+  "currentTask": "Nykyinen tehtävä",
+  "noTask": "Ei tehtävää valittuna"
 }
